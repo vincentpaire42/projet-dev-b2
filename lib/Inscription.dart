@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 class InscriptionPage extends StatefulWidget {
   const InscriptionPage({Key? key}) : super(key: key);
 
@@ -159,7 +160,16 @@ TextFormField(
           ),
           const SizedBox(height: 16.0),
           ElevatedButton(
-            onPressed: _submitForm,
+            onPressed: (){
+              FirebaseFirestore.instance.collection('user').add({
+                'first_name': _prenom,
+                'last_name': _nom,
+                'email': _email,
+                'password': _password,
+            
+              });
+              Navigator.pop(context);
+            },
             child: const Text('S\'inscrire'),
           ),
         ],
