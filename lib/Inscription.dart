@@ -42,7 +42,7 @@ class _InscriptionPageState extends State<InscriptionPage> {
       } else {
         // Votre code pour inscrire l'utilisateur ici
         print(
-            'Nom: $_nom, Prénom: $_prenom, Email: $_email, Password: $_password, Adresse Postal: $_adressePostal');
+            'Nom: $_nom, Prénom: $_prenom, Email: $_email, AdressePostal: $_adressePostal, Password: $_password,confirmPassword: $_confirmPassword ');
       }
     }
   }
@@ -82,6 +82,22 @@ class _InscriptionPageState extends State<InscriptionPage> {
             },
             onSaved: (String? value) {
               _prenom = value!;
+            },
+          ),
+          
+TextFormField(
+            keyboardType: TextInputType.text,
+            decoration: const InputDecoration(
+              labelText: 'Adrresse',
+            ),
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return 'Veuillez saisir votre adresse';
+              }
+              return null;
+            },
+            onSaved: (String? value) {
+              _adressePostal = value!;
             },
           ),
           TextFormField(
@@ -132,10 +148,10 @@ class _InscriptionPageState extends State<InscriptionPage> {
                 return 'Veuillez confirmer votre mot de passe';
               }
 
-              if (value != _password) {
-                return 'Les mots de passe ne correspondent pas';
-              }
-              return null;
+              // if (value != _password) {
+              //   return 'Les mots de passe ne correspondent pas';
+              // }
+              // return null;
             },
             onSaved: (String? value) {
               _confirmPassword = value!;
