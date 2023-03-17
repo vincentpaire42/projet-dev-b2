@@ -1,22 +1,23 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 class InscriptionPage extends StatefulWidget {
   const InscriptionPage({Key? key}) : super(key: key);
 
   @override
   _InscriptionPageState createState() => _InscriptionPageState();
 }
+
 class _InscriptionPageState extends State<InscriptionPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  late String _nom;
-  late String _prenom;
-  late String _email;
-   String _password = '';
-   String _confirmPassword= '' ;
+  final _nom = TextEditingController();
+  final _prenom = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
+  final _adressePostal = TextEditingController();
 
-  late String _adressePostal;
 
   void _submitForm() {
     final FormState form = _formKey.currentState!;
@@ -50,131 +51,73 @@ class _InscriptionPageState extends State<InscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          TextFormField(
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              labelText: 'Nom',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Inscription'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+            children: [
+        ListTile(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(43),
+        side: const BorderSide(color: Colors.black38, width: 1.5),
+      ),
+      title: Row(
+        children: [
+          const Text('Nom: '),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                  border: InputBorder.none
+              ),
+              controller: _nom,
             ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir votre nom';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _nom = value!;
-            },
           ),
-          TextFormField(
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              labelText: 'Prénom',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir votre prénom';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _prenom = value!;
-            },
-          ),
-          
-TextFormField(
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              labelText: 'Adrresse',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir votre adresse';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _adressePostal = value!;
-            },
-          ),
-          TextFormField(
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Adresse email',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir une adresse e-mail valide';
-              }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                  .hasMatch(value)) {
-                return 'Veuillez saisir une adresse e-mail valide';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _email = value!;
-            },
-          ),
-            TextFormField(
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Mot de passe',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir un mot de passe valide';
-              }
-              // if (!RegExp(r'^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$&*~]).{8,}$')
-              //     .hasMatch(value)) {
-              //   return 'Veuillez saisir un mot de passe valide';
-              // }
-              return null;
-            },
-            onSaved: (String? value) {
-              _password = value!;
-            },
-          ),
-          TextFormField(
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Confirmer le mot de passe',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez confirmer votre mot de passe';
-              }
 
-              // if (value != _password) {
-              //   return 'Les mots de passe ne correspondent pas';
-              // }
-              // return null;
-            },
-            onSaved: (String? value) {
-              _confirmPassword = value!;
-            },
-          ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: (){
-              FirebaseFirestore.instance.collection('user').add({
-                'first_name': _prenom,
-                'last_name': _nom,
-                'email': _email,
-                'password': _password,
-            
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('S\'inscrire'),
-          ),
         ],
       ),
-    );
-  }
+    ),
+    const SizedBox(height: 20,),
+    ListTile(
+      shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(43),
+      side: const BorderSide(color: Colors.black38, width: 1.5),
+    ),
+      title: Row(
+       children: [
+    const Text('Prenom: '),
+    Expanded(
+    child: TextField(
+    decoration: const InputDecoration(
+    border: InputBorder.none
+    ),
+    controller: _nom ,
+    ),
+    ),
+
+    ],
+    ),
+    ),
+    const SizedBox(height: 20,),
+
+    ElevatedButton(
+    onPressed: (){
+    FirebaseFirestore.instance.collection('user').add({
+    'first_name': _prenom,
+    'last_name': _nom,
+    'email': _email,
+    'password': _password,
+
+    });
+    Navigator.pop(context);
+            },
+            child: const Text('S\'inscrire'),
+           ),
+          ],
+        ),
+      );
+    }
 }
                   
