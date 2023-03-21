@@ -30,7 +30,19 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flutter Firebase'),
+        leading: IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: (){
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (BuildContext context){
+                return const  InscriptionPage();
+              },)
+            );
+          }
+          ,
+        ),
       ),
+
       body: MoviesInformation(),
     );
   }
@@ -69,6 +81,7 @@ class _MoviesInformationState extends State<MoviesInformation> {
             }
             return ListTile(
               title: Text(name),
+              
             );
           }).toList(),
         );

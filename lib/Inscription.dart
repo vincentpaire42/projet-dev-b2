@@ -81,17 +81,101 @@ class _InscriptionPageState extends State<InscriptionPage> {
 
         ],
       ),
+      
     ),
-    
+      const SizedBox(height: 20),
+
+      ListTile(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(43),
+        side: const BorderSide(color: Colors.black38, width: 1.5),
+      ),
+      title: Row(
+        children: [
+          const Text('Prénom: '),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                  border: InputBorder.none
+              ),
+              controller: _prenom,
+            ),
+          ), 
+        ],
+      ),
+    ),
+    const SizedBox(height: 20),
+
+      ListTile(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(43),
+        side: const BorderSide(color: Colors.black38, width: 1.5),
+      ),
+      title: Row(
+        children: [
+          const Text('email: '),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                  border: InputBorder.none
+              ),
+              controller: _email,
+            ),
+          ), 
+        ],
+      ),
+    ),
+    const SizedBox(height: 20),
+
+      ListTile(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(43),
+        side: const BorderSide(color: Colors.black38, width: 1.5),
+      ),
+      title: Row(
+        children: [
+          const Text('adresse: '),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                  border: InputBorder.none
+              ),
+              controller: _adressePostal,
+            ),
+          ), 
+        ],
+      ),
+    ),
+const SizedBox(height: 20),
+
+      ListTile(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(43),
+        side: const BorderSide(color: Colors.black38, width: 1.5),
+      ),
+      title: Row(
+        children: [
+          const Text('password: '),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                  border: InputBorder.none
+              ),
+              controller: _password,
+            ),
+          ), 
+        ],
+      ),
+    ),
     
     ElevatedButton(
     onPressed: (){
     FirebaseFirestore.instance.collection('user').add({
-    // 'first_name': _prenom,
-    'nom': _nom.value.text,
-   
-    // 'email': _email,
-    // 'password': _password,
+    'first_name': _prenom.value.text,
+    'last_name': _nom.value.text,
+    'postal_address': _adressePostal.value.text,
+    'email': _email.value.text,
+    'password': _password.value.text,
 
     });
     // Navigator.pop(InscriptionPage);
