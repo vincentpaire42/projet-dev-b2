@@ -1,180 +1,108 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 class InscriptionPage extends StatefulWidget {
   const InscriptionPage({Key? key}) : super(key: key);
 
   @override
   _InscriptionPageState createState() => _InscriptionPageState();
 }
+
 class _InscriptionPageState extends State<InscriptionPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  late String _nom;
-  late String _prenom;
-  late String _email;
-   String _password = '';
-   String _confirmPassword= '' ;
+  final _nom = TextEditingController();
+  final _prenom = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
+  final _adressePostal = TextEditingController();
 
-  late String _adressePostal;
 
-  void _submitForm() {
-    final FormState form = _formKey.currentState!;
+  // void _submitForm() {
+  //   final FormState form = _formKey.currentState!;
 
-    if (form.validate()) {
-      form.save();
+  //   if (form.validate()) {
+  //     form.save();
 
-      if (_password != _confirmPassword) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Erreur'),
-              content: Text('Les mots de passe ne correspondent pas.'),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('OK'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        // Votre code pour inscrire l'utilisateur ici
-        print(
-            'Nom: $_nom, Prénom: $_prenom, Email: $_email, AdressePostal: $_adressePostal, Password: $_password,confirmPassword: $_confirmPassword ');
-      }
-    }
-  }
+  //     if (_password != _confirmPassword) {
+  //       showDialog(
+  //         context: context,
+  //         builder: (BuildContext context) {
+  //           return AlertDialog(
+  //             title: Text('Erreur'),
+  //             content: Text('Les mots de passe ne correspondent pas.'),
+  //             actions: <Widget>[
+  //               TextButton(
+  //                 child: Text('OK'),
+  //                 onPressed: () => Navigator.of(context).pop(),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     } else {
+  //       // Votre code pour inscrire l'utilisateur ici
+  //       print(
+  //           'Nom: $_nom, Prénom: $_prenom, Email: $_email, AdressePostal: $_adressePostal, Password: $_password,confirmPassword: $_confirmPassword ');
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          TextFormField(
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              labelText: 'Nom',
+    return Scaffold (
+      appBar: AppBar(
+        title: const Text('Inscription'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+            children: [
+        ListTile(
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(43),
+        side: const BorderSide(color: Colors.black38, width: 1.5),
+      ),
+      title: Row(
+        children: [
+          const Text('Nom: '),
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                  border: InputBorder.none
+              ),
+              controller: _nom,
             ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir votre nom';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _nom = value!;
-            },
           ),
-          TextFormField(
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              labelText: 'Prénom',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir votre prénom';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _prenom = value!;
-            },
-          ),
-          
-TextFormField(
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              labelText: 'Adrresse',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir votre adresse';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _adressePostal = value!;
-            },
-          ),
-          TextFormField(
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Adresse email',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir une adresse e-mail valide';
-              }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                  .hasMatch(value)) {
-                return 'Veuillez saisir une adresse e-mail valide';
-              }
-              return null;
-            },
-            onSaved: (String? value) {
-              _email = value!;
-            },
-          ),
-            TextFormField(
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Mot de passe',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez saisir un mot de passe valide';
-              }
-              // if (!RegExp(r'^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$&*~]).{8,}$')
-              //     .hasMatch(value)) {
-              //   return 'Veuillez saisir un mot de passe valide';
-              // }
-              return null;
-            },
-            onSaved: (String? value) {
-              _password = value!;
-            },
-          ),
-          TextFormField(
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: 'Confirmer le mot de passe',
-            ),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez confirmer votre mot de passe';
-              }
 
-              // if (value != _password) {
-              //   return 'Les mots de passe ne correspondent pas';
-              // }
-              // return null;
-            },
-            onSaved: (String? value) {
-              _confirmPassword = value!;
-            },
-          ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: (){
-              FirebaseFirestore.instance.collection('user').add({
-                'first_name': _prenom,
-                'last_name': _nom,
-                'email': _email,
-                'password': _password,
-            
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('S\'inscrire'),
-          ),
         ],
       ),
+    ),
+    
+    
+    ElevatedButton(
+    onPressed: (){
+    FirebaseFirestore.instance.collection('user').add({
+    // 'first_name': _prenom,
+    'nom': _nom.value.text,
+   
+    // 'email': _email,
+    // 'password': _password,
+
+    });
+    // Navigator.pop(InscriptionPage);
+            },
+            child: const Text('S\'inscrire'),
+           ),
+            ],
+          ),
+        ),
     );
   }
-}
-                  
+    
+  
+}              
