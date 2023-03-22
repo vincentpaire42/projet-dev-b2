@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'Connexion.dart';
+import 'Accueil.dart';
+
 import 'Inscription.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -18,7 +21,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       title: 'Flutter Firebase',
-      home: const HomePage(),
+      home: const InscriptionPage(),
+
     );
   }
 }
@@ -35,7 +39,7 @@ class HomePage extends StatelessWidget {
           onPressed: (){
             Navigator.of(context).push(
               MaterialPageRoute(builder: (BuildContext context){
-                return const  InscriptionPage();
+                return const  Accueil();
               },)
             );
           }
