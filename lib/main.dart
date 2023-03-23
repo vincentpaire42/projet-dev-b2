@@ -1,95 +1,79 @@
+import 'package:projet_dev_b2/Connexion.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'Connexion.dart';
-import 'Accueil.dart';
+import 'package:projet_dev_b2/Inscription.dart';
+import 'package:provider/provider.dart';
+import 'package:projet_dev_b2/authentication_service.dart';
+import 'package:projet_dev_b2/home_page.dart';
 
-import 'Inscription.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      title: 'Flutter Firebase',
-      home: const InscriptionPage(),
-
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Firebase'),
-        leading: IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: (){
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (BuildContext context){
-                return const  Accueil();
-              },)
-            );
-          }
-          ,
-        ),
-      ),
-
-      body: MoviesInformation(),
-    );
-  }
-}
-
-class MoviesInformation extends StatefulWidget {
-  const MoviesInformation({Key? key}) : super(key: key);
-  @override
-  _MoviesInformationState createState() => _MoviesInformationState();
-}
-
-class _MoviesInformationState extends State<MoviesInformation> {
-  final Stream<QuerySnapshot> userstream =
-      FirebaseFirestore.instance.collection('user').snapshots();
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: userstream,
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    return FutureBuilder(
+      future: _initialization,
+      builder: (context, AsyncSnapshot<FirebaseApp> snapshot) {
         if (snapshot.hasError) {
-          return Text('Something went wrong');
+          return MaterialApp(
+              home: Scaffold(body: Text("Erreur d'initialisation Firebase")));
         }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Text("Loading");
+        if (snapshot.connectionState == ConnectionState.done) {
+          return MultiProvider(
+            providers: [
+              Provider<AuthenticationService>(
+                create: (_) => AuthenticationService(FirebaseAuth.instance),
+              ),
+              StreamProvider(
+                create: (context) =>
+                context.read<AuthenticationService>().authStateChanges,
+                initialData: null,
+              ),
+            ],
+            child: MaterialApp(
+              // Ajoutez les routes pour SignInPage et SignUpPage
+              routes: {
+                '/sign-in': (context) => SignInPage(),
+                '/sign-up': (context) => SignUpPage(),
+              },
+              home: AuthWrapper(),
+            ),
+          );
         }
 
-        return ListView(
-          children: snapshot.data!.docs.map((DocumentSnapshot document) {
-            Map<String, dynamic> user =
-                document.data()! as Map<String, dynamic>;
-            String? name = user['name'];
-            if (name == null) {
-              return const SizedBox.shrink();
-            }
-            return ListTile(
-              title: Text(name),
-              
-            );
-          }).toList(),
-        );
+        return MaterialApp(home: Scaffold(body: CircularProgressIndicator()));
       },
     );
+  }
+}
+
+class AuthWrapper extends StatefulWidget {
+  @override
+  _AuthWrapperState createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AuthenticationService>().authStateChanges.listen((User? user) {
+      setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final firebaseUser = context.watch<User?>();
+    if (firebaseUser != null) {
+      return HomePage();
+    }
+    return SignInPage();
   }
 }
