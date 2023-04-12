@@ -25,6 +25,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       'description': description,
       'user_id': userId,
       'created_at': FieldValue.serverTimestamp(),
+      'authorId': FirebaseAuth.instance.currentUser!.uid,
     })
         .then((value) => print("Post ajouté"))
         .catchError((error) => print("Erreur lors de l'ajout du post: $error"));

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:projet_dev_b2/home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:projet_dev_b2/Connexion.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,13 +32,18 @@ class _SignUpPageState extends State<SignUpPage> {
     required String phoneNumber,
   }) async {
     CollectionReference users = FirebaseFirestore.instance.collection('users');
-    return users.doc(uid).set({
+    return users
+        .doc(uid)
+        .set({
       'first_name': firstName,
       'last_name': lastName,
       'age': age,
       'phone_number': phoneNumber,
-    }).catchError((error) => print("Failed to add user: $error"));
+      'isAdmin': false,
+    })
+        .catchError((error) => print("Failed to add user: $error"));
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -137,10 +143,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     if (_formKey.currentState!.validate()) {
                       // Insérer ici la logique d'inscription et de sauvegarde des données utilisateur
                       final String signUpStatus =
-                          await context.read<AuthenticationService>().signUp(
-                                email: emailController.text.trim(),
-                                password: passwordController.text.trim(),
-                              );
+                      await context.read<AuthenticationService>().signUp(
+                        email: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                      );
                       ScaffoldMessenger.of(context)
                           .showSnackBar(SnackBar(content: Text(signUpStatus)));
                       if (signUpStatus == "Inscription réussie") {
@@ -154,15 +160,27 @@ class _SignUpPageState extends State<SignUpPage> {
                             phoneNumber: phoneNumberController.text.trim(),
                           );
                         }
+                        // Naviguez vers la page d'accueil après l'inscription réussie
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => SignInPage()),
+                          MaterialPageRoute(builder: (context) => HomePage()),
                         );
                       }
                     }
                   },
                   child: Text("S'inscrire"),
                 ),
+                SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignInPage()),
+                    );
+                  },
+                  child: Text("Se connecter"),
+                ),
+
               ],
             ),
           ),

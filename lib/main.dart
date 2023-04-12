@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:projet_dev_b2/Connexion.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,10 +8,16 @@ import 'package:projet_dev_b2/Inscription.dart';
 import 'package:provider/provider.dart';
 import 'package:projet_dev_b2/authentication_service.dart';
 import 'package:projet_dev_b2/home_page.dart';
+import 'package:projet_dev_b2/authentication_model.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AuthenticationModel(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -38,7 +46,7 @@ class MyApp extends StatelessWidget {
               ),
             ],
             child: MaterialApp(
-              // Ajoutez les routes pour SignInPage et SignUpPage
+              title: 'ProMatch',
               routes: {
                 '/sign-in': (context) => SignInPage(),
                 '/sign-up': (context) => SignUpPage(),
@@ -55,17 +63,27 @@ class MyApp extends StatelessWidget {
 }
 
 class AuthWrapper extends StatefulWidget {
-  @override
-  _AuthWrapperState createState() => _AuthWrapperState();
+@override
+_AuthWrapperState createState() => _AuthWrapperState();
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
+  StreamSubscription<User?>? _authStateSubscription;
+
   @override
   void initState() {
     super.initState();
-    context.read<AuthenticationService>().authStateChanges.listen((User? user) {
-      setState(() {});
+    _authStateSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (mounted) { // Ajoutez cette vérification
+        setState(() {});
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _authStateSubscription?.cancel();
+    super.dispose();
   }
 
   @override
