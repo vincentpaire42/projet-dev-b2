@@ -33,9 +33,9 @@ class HomePage extends StatelessWidget {
             id: postSnapshot.id,
             title: postData['title'],
             description: postData['description'],
+            authorId: postData['authorId'],
             authorFirstName: authorData['first_name'],
-            authorLastNameInitial: authorData['last_name']
-                [0], // Prendre la première lettre du nom de famille
+            authorLastNameInitial: authorData['last_name'][0],
           ),
         );
       }
@@ -53,10 +53,10 @@ class HomePage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
-            await context.read<AuthenticationService>().signOut();
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/sign-in', (Route<dynamic> route) => false);
-          },
+              await context.read<AuthenticationService>().signOut();
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/sign-in', (Route<dynamic> route) => false);
+            },
           ),
         ],
       ),

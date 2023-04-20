@@ -41,9 +41,11 @@ class MyApp extends StatelessWidget {
               ),
               StreamProvider(
                 create: (context) =>
-                context.read<AuthenticationService>().authStateChanges,
+                    context.read<AuthenticationService>().authStateChanges,
                 initialData: null,
               ),
+              // Ajouter ChatService en tant que fournisseur
+
             ],
             child: MaterialApp(
               title: 'ProMatch',
@@ -63,8 +65,8 @@ class MyApp extends StatelessWidget {
 }
 
 class AuthWrapper extends StatefulWidget {
-@override
-_AuthWrapperState createState() => _AuthWrapperState();
+  @override
+  _AuthWrapperState createState() => _AuthWrapperState();
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
@@ -73,8 +75,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   void initState() {
     super.initState();
-    _authStateSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (mounted) { // Ajoutez cette vérification
+    _authStateSubscription =
+        FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (mounted) {
+        // Ajoutez cette vérification
         setState(() {});
       }
     });

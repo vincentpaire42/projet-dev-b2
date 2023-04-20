@@ -3,9 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'authentication_service.dart';
-import 'conversation_page.dart';
+import 'conversation.dart';
 import 'conversation_service.dart';
+import 'conversations_page.dart';
 import 'post.dart';
+
+String createGroupChatId(String userId, String recipientId) {
+  if (userId.hashCode <= recipientId.hashCode) {
+    return '$userId-$recipientId';
+  } else {
+    return '$recipientId-$userId';
+  }
+}
 
 class PostDetailPage extends StatelessWidget {
   final Post post;
@@ -42,33 +51,42 @@ class PostDetailPage extends StatelessWidget {
             // Ajoutez le bouton "Répondre" à la page de détail du post
             ElevatedButton(
               onPressed: () async {
-                // Créez une nouvelle conversation ou récupérez une conversation existante
-                final conversationRef = await createConversation(
+                // Utilisez MessageDatabaseService pour créer une conversation et envoyer un message
+                MessageDatabaseService messageDatabaseService = MessageDatabaseService();
+
+                // Créez un groupe de discussion ID en combinant les deux ID d'utilisateur
+                String groupChatId = createGroupChatId(
                   context.read<AuthenticationService>().getCurrentUser()!.uid,
-                  // L'utilisateur actuel
-                  post.authorFirstName, // L'auteur du post
+                  post.authorId,
                 );
 
-                // Envoyez le message dans la conversation
-                await sendMessage(
-                  conversationRef.id,
-                  context.read<AuthenticationService>().getCurrentUser()!.uid,
-                  // L'utilisateur actuel
-                  post.authorFirstName, // L'auteur du post
-                  'J\'ai répondu à votre post : ${post.title}\n\n${responseController.text}', // Incluez la réponse de l'utilisateur
+                // Envoyez le message initial
+                Message initialMessage = Message(
+                  idFrom: context.read<AuthenticationService>().getCurrentUser()!.uid,
+                  idTo: post.authorId,
+                  timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
+                  content:
+                  'J\'ai répondu à votre post : ${post.title}\n\n${responseController.text}',
+                  type: 0,
                 );
+
+                messageDatabaseService.onSendMessage(groupChatId, initialMessage);
 
                 // Afficher une notification pour indiquer que le message a été envoyé
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text('Message envoyé')));
 
                 // Naviguer vers la page de conversation
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ConversationPage(
-                      conversationId: conversationRef.id,
-                      participants: [post.authorFirstName, context.read<AuthenticationService>().getCurrentUser()!.uid],
+                      conversationId: groupChatId,
+                      participants: [
+                        post.authorId,
+                        context.read<AuthenticationService>().getCurrentUser()!.uid,
+
+                      ],
                     ),
                   ),
                 );

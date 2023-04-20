@@ -1,44 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-// Créer une nouvelle conversation
-Future<DocumentReference<Map<String, dynamic>>> createConversation(String userId, String recipientId) async {
-  // Vérifier si la conversation existe déjà
-  final existingConversations = await FirebaseFirestore.instance
-      .collection('conversations')
-      .where('participants', arrayContainsAny: [userId, recipientId])
-      .get();
 
-  if (existingConversations.docs.isNotEmpty) {
-    return existingConversations.docs.first.reference;
+import 'conversation.dart';
+
+class MessageDatabaseService {
+
+  List<Message> _messageListFromSnapshot(QuerySnapshot<Map<String, dynamic>> snapshot) {
+    return snapshot.docs.map((doc) {
+      return _messageFromSnapshot(doc);
+    }).toList();
   }
 
-  // Créer une nouvelle conversation
-  final conversationData = {
-    'participants': [userId, recipientId],
-    'createdAt': FieldValue.serverTimestamp(),
-  };
+  Message _messageFromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    var data = snapshot.data();
+    if (data == null) throw Exception("message not found");
+    return Message.fromMap(data);
+  }
 
-  final conversationRef = await FirebaseFirestore.instance.collection('conversations').add(conversationData);
+  Stream<List<Message>> getMessage(String groupChatId, int limit) {
+    return FirebaseFirestore.instance
+        .collection('messages')
+        .doc(groupChatId)
+        .collection(groupChatId)
+        .orderBy('timestamp', descending: true)
+        .limit(limit)
+        .snapshots().map(_messageListFromSnapshot);
+  }
 
-  // Créer une collection "messages" pour la nouvelle conversation
-  await conversationRef.collection('messages').add({
-    'from': userId,
-    'to': recipientId,
-    'content': 'Conversation créée',
-    'timestamp': FieldValue.serverTimestamp(),
-  });
+  void onSendMessage(String groupChatId, Message message) {
+    var documentReference = FirebaseFirestore.instance
+        .collection('messages')
+        .doc(groupChatId)
+        .collection(groupChatId)
+        .doc(DateTime.now().millisecondsSinceEpoch.toString());
 
-  return conversationRef;
-}
-
-// Envoyer un message dans une conversation existante
-Future<void> sendMessage(String conversationId, String fromUserId, String toUserId, String content) async {
-  final messageData = {
-    'from': fromUserId,
-    'to': toUserId,
-    'content': content,
-    'timestamp': FieldValue.serverTimestamp(),
-  };
-
-  await FirebaseFirestore.instance.collection('conversations').doc(conversationId).collection('messages').add(messageData);
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      transaction.set(documentReference,message.toHashMap());
+    });
+  }
 }

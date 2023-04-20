@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:projet_dev_b2/home_page.dart';
 import 'package:provider/provider.dart';
 import 'authentication_service.dart';
 import 'package:projet_dev_b2/Inscription.dart';
@@ -41,7 +43,13 @@ class _SignInPageState extends State<SignInPage> {
                   password: passwordController.text.trim(),
                 );
 
-                if (signInError != null) {
+                FirebaseAuth auth = FirebaseAuth.instance;
+                if (auth.currentUser != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage()),
+                  );
+                } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(signInError)),
                   );
