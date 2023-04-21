@@ -1,52 +1,101 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'conversation.dart';
-import 'conversation_service.dart';
+
 class ConversationPage extends StatefulWidget {
   final String conversationId;
-  final List<String> participants;
+  final List<dynamic> participants;
 
-  const ConversationPage({
-    Key? key,
-    required this.conversationId,
-    required this.participants,
-  }) : super(key: key);
+  const ConversationPage({Key? key, required this.conversationId, required this.participants})
+      : super(key: key);
 
   @override
   _ConversationPageState createState() => _ConversationPageState();
 }
 
 class _ConversationPageState extends State<ConversationPage> {
-  final MessageDatabaseService _messageDatabaseService = MessageDatabaseService();
-  final int messageLimit = 20; // Changez cette valeur pour afficher un nombre différent de messages
+  late Stream<QuerySnapshot> messagesStream;
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    messagesStream = FirebaseFirestore.instance
+        .collection('messages')
+        .where('conversationId', isEqualTo: widget.conversationId)
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
+  Future<void> _sendMessage() async {
+    if (_messageController.text.trim().isEmpty) return;
+
+    String content = _messageController.text.trim();
+    _messageController.clear();
+
+    await FirebaseFirestore.instance.collection('messages').add({
+      'conversationId': widget.conversationId,
+      'idFrom': widget.participants[0],
+      'idTo': widget.participants[1],
+      'content': content,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': 'text',
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Conversation'),
+        title: Text('Conversation avec ${widget.participants.join(', ')}'),
       ),
-      body: StreamBuilder<List<Message>>(
-        stream: _messageDatabaseService.getMessage(widget.conversationId, messageLimit),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: messagesStream,
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text("Erreur: ${snapshot.error}");
+                }
 
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final messages = snapshot.data!;
-            return ListView.builder(
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                return ListTile(
-                  title: Text(message.content),
-                  subtitle: Text(message.timestamp),
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                }
+
+                return ListView(
+                  reverse: true,
+                  children: snapshot.data!.docs.map((DocumentSnapshot message) {
+                    Map<String, dynamic> messageData = message.data() as Map<String, dynamic>;
+                    return ListTile(
+                      title: Text(messageData['content']),
+                      subtitle: Text(messageData['timestamp'] != null
+                          ? (messageData['timestamp'] as Timestamp).toDate().toString()
+                          : ''),
+                    );
+                  }).toList(),
                 );
               },
-            );
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Erreur lors du chargement des messages'));
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(hintText: "Envoyer un message"),
+                  ),
+                ),
+                IconButton(
+                  onPressed: _sendMessage,
+                  icon: Icon(Icons.send),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

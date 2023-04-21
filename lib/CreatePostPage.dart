@@ -12,11 +12,16 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _budgetController = TextEditingController();
+  final TextEditingController _lieuxController = TextEditingController();
+
 
   Future<void> savePost({
     required String title,
     required String description,
     required String userId,
+    required String Budget,
+    required String Lieux,
   }) async {
     CollectionReference posts = FirebaseFirestore.instance.collection('posts');
     return posts
@@ -26,6 +31,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
       'user_id': userId,
       'created_at': FieldValue.serverTimestamp(),
       'authorId': FirebaseAuth.instance.currentUser!.uid,
+      'budget': Budget,
+      'lieu': Lieux,
     })
         .then((value) => print("Post ajouté"))
         .catchError((error) => print("Erreur lors de l'ajout du post: $error"));
@@ -64,6 +71,27 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   return null;
                 },
               ),
+              TextFormField(
+                controller: _budgetController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: 'Budget'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer un prix';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _lieuxController,
+                decoration: InputDecoration(labelText: 'Lieu'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer un lieu';
+                  }
+                  return null;
+                },
+              ),
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
@@ -75,6 +103,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       await savePost(
                         title: _titleController.text.trim(),
                         description: _descriptionController.text.trim(),
+                        Budget: _budgetController.text.trim(),
+                        Lieux: _lieuxController.text.trim(),
                         userId: user.uid,
                       );
                       // Revenir à la page d'accueil

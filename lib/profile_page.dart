@@ -30,11 +30,45 @@ class ProfilePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Prénom: ${userData['first_name']}'),
-                  Text('Nom: ${userData['last_name']}'),
-                  Text('Âge: ${userData['age']}'),
-                  Text('Numéro de téléphone: ${userData['phone_number']}'),
-                  Text('Email: ${FirebaseAuth.instance.currentUser!.email}'),
+                  Center(
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(
+                          userData['profile_image_url'] ?? "https://via.placeholder.com/150"),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "Prénom",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text('${userData['first_name']}'),
+                  SizedBox(height: 8),
+                  Text(
+                    "Nom",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text('${userData['last_name']}'),
+                  SizedBox(height: 8),
+                  Text(
+                    "Âge",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text('${userData['age']} ans'),
+                  SizedBox(height: 8),
+                  Text(
+                    "Numéro de téléphone",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text('${userData['phone_number']}'),
+                  SizedBox(height: 8),
+                  Text(
+                    "Email",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text('${FirebaseAuth.instance.currentUser!.email}'),
+                  SizedBox(height: 16),
+
                 ],
               ),
             );
