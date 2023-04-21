@@ -10,6 +10,14 @@ class NewConversationPage extends StatefulWidget {
 class _NewConversationPageState extends State<NewConversationPage> {
   final TextEditingController _userIdController = TextEditingController();
 
+
+  Future<String> getUserNameById(String userId) async {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+    return '${userData['firstName']} ${userData['lastNameInitial']}.';
+  }
+
+
   @override
   void dispose() {
     _userIdController.dispose();
@@ -44,16 +52,22 @@ class _NewConversationPageState extends State<NewConversationPage> {
                     'created_at': FieldValue.serverTimestamp(),
                   });
 
+                  String authorName = await getUserNameById(userId); // Ajoutez cette ligne
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ConversationPage(conversationId: conversationRef.id, participants: [userId]),
+                      builder: (context) => ConversationPage(
+                        conversationId: conversationRef.id,
+                        participants: [userId],
+                      ),
                     ),
                   );
                 }
               },
               child: Text('Démarrer une conversation'),
             ),
+
           ],
         ),
       ),

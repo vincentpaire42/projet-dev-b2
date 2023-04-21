@@ -5,7 +5,16 @@ import 'package:provider/provider.dart';
 import 'authentication_service.dart';
 import 'conversation_page.dart';
 import 'conversation_service.dart';
+import 'message_service.dart';
 import 'post.dart';
+
+String createGroupChatId(String userId, String recipientId) {
+  if (userId.hashCode <= recipientId.hashCode) {
+    return '$userId-$recipientId';
+  } else {
+    return '$recipientId-$userId';
+  }
+}
 
 class PostDetailPage extends StatelessWidget {
   final Post post;
@@ -22,60 +31,83 @@ class PostDetailPage extends StatelessWidget {
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              post.title,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(post.description),
-            SizedBox(height: 8),
-            Text('Auteur: ${post.authorFirstName} ${post.authorLastNameInitial}.'),
-            SizedBox(height: 16),
-            TextFormField(
-              controller: responseController, // Ajoutez le contrôleur
-              decoration: InputDecoration(labelText: 'Réponse'),
-            ),
-            SizedBox(height: 8),
-            // Ajoutez le bouton "Répondre" à la page de détail du post
-            ElevatedButton(
-              onPressed: () async {
-                // Créez une nouvelle conversation ou récupérez une conversation existante
-                final conversationRef = await createConversation(
-                  context.read<AuthenticationService>().getCurrentUser()!.uid,
-                  // L'utilisateur actuel
-                  post.authorFirstName, // L'auteur du post
-                );
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                post.title,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(post.description, style: TextStyle(fontSize: 18)),
+              SizedBox(height: 8),
+              Text(
+                  'Auteur: ${post.authorFirstName} ${post.authorLastNameInitial}.'),
+              SizedBox(height: 16),
+              Text('Budget: ${post.budget} €'),
+              SizedBox(height: 16),
+              Text('Lieu: ${post.Lieux}'),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: responseController, // Ajoutez le contrôleur
+                decoration: InputDecoration(labelText: 'Réponse'),
+              ),
+              SizedBox(height: 8),
+              // Ajoutez le bouton "Répondre" à la page de détail du post
+              ElevatedButton(
+                onPressed: () async {
+                  // Utilisez MessageDatabaseService pour créer une conversation et envoyer un message
+                  MessageDatabaseService messageDatabaseService =
+                      MessageDatabaseService();
 
-                // Envoyez le message dans la conversation
-                await sendMessage(
-                  conversationRef.id,
-                  context.read<AuthenticationService>().getCurrentUser()!.uid,
-                  // L'utilisateur actuel
-                  post.authorFirstName, // L'auteur du post
-                  'J\'ai répondu à votre post : ${post.title}\n\n${responseController.text}', // Incluez la réponse de l'utilisateur
-                );
+                  // Créez un groupe de discussion ID en combinant les deux ID d'utilisateur
+                  String groupChatId = createGroupChatId(
+                    context.read<AuthenticationService>().getCurrentUser()!.uid,
+                    post.authorId,
+                  );
 
-                // Afficher une notification pour indiquer que le message a été envoyé
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('Message envoyé')));
+                  // Envoyez le message initial
+                  Message initialMessage = Message(
+                    idFrom: context
+                        .read<AuthenticationService>()
+                        .getCurrentUser()!
+                        .uid,
+                    idTo: post.authorId,
+                    timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
+                    content:
+                        'J\'ai répondu à votre post : ${post.title}\n\n${responseController.text}',
+                    type: 0,
+                  );
 
-                // Naviguer vers la page de conversation
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ConversationPage(
-                      conversationId: conversationRef.id,
-                      participants: [post.authorFirstName, context.read<AuthenticationService>().getCurrentUser()!.uid],
+                  messageDatabaseService.onSendMessage(
+                      groupChatId, initialMessage);
+
+                  // Afficher une notification pour indiquer que le message a été envoyé
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Message envoyé')));
+
+                  // Naviguer vers la page de conversation
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ConversationPage(
+                        conversationId: groupChatId,
+                        participants: [
+                          post.authorId,
+                          context
+                              .read<AuthenticationService>()
+                              .getCurrentUser()!
+                              .uid,
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-              child: Text('Répondre'),
-            ),
-          ],
+                  );
+                },
+                child: Text('Répondre'),
+              ),
+            ],
+          ),
         ),
       ),
     );
