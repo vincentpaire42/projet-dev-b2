@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:projet_dev_b2/Connexion.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:projet_dev_b2/authentication_service.dart';
 import 'package:projet_dev_b2/home_page.dart';
 import 'package:projet_dev_b2/authentication_model.dart';
-import 'package:projet_dev_b2/nav_bar.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,7 +74,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void initState() {
     super.initState();
     _authStateSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (mounted) {
+      if (mounted) { // Ajoutez cette vérification
         setState(() {});
       }
     });
@@ -92,49 +90,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User?>();
     if (firebaseUser != null) {
-      return MainApp(); // Modifié pour retourner MainApp au lieu de HomePage
+      return HomePage();
     }
     return SignInPage();
   }
 }
-
-// Ajout de la classe MainApp
-class MainApp extends StatefulWidget {
-  @override
-  _MainAppState createState() => _MainAppState();
-}
-
-class _MainAppState extends State<MainApp> {
-  String authorName = '';
-
-  @override
-  void initState() {
-    super.initState();
-    getAuthorName();
-  }
-
-  Future<void> getAuthorName() async {
-    // Remplacez cette ligne par le code pour récupérer le nom de l'auteur depuis Firebase
-    String name = await fetchAuthorNameFromFirebase();
-    setState(() {
-      authorName = name;
-    });
-  }
-
-  // Définir la méthode fetchAuthorNameFromFirebase pour récupérer le nom de l'auteur depuis Firebase
-  Future<String> fetchAuthorNameFromFirebase() async {
-    String currentUserId = FirebaseAuth.instance.currentUser!.uid;
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(currentUserId).get();
-    Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-    return '${userData['first_name']} ${userData['last_name']}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: NavBar(authorName: authorName),
-    );
-  }
-}
-
-
