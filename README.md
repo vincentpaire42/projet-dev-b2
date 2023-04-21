@@ -1,16 +1,9 @@
-# projet_dev_b2
+# ProMatch
 
-A new Flutter project.
+ProMatch est une application mobile ayant comme principe la mise en relation entre personnes dans le but de proposer tous types de services (jardinage, plomberie, courses, dépannage informatique…).
 
-## Getting Started
+## Comment utiliser ?
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Pour l'instant, l'application est disponible uniquement sur Android, en installant manuellement l'application :
+- Télécharger depuis le dernier realease : https://github.com/vincentpaire42/projet-dev-b2/releases
+- Installer l'APK
